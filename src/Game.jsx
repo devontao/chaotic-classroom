@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {GameMode, AIPolicy, GameState, Energy} from './enums.js'
 import { GameEvent } from './GameEvent.js'
 import studentImage from './assets/student.jpeg'
@@ -13,6 +13,8 @@ export default function Game(){
     const [studentsCaught, setStudentsCaught] = useState(0)
     const [studentsGotAway, setStudentsGotAway] = useState(0)
     const [studentsFalselyAccused, setStudentsFalselyAccused] = useState(0)
+    const studentUseAI = useRef(false);
+    const profSuspectAI = useRef(false);
 
     function ProfessorButton() {
         function handleClick() {
@@ -76,17 +78,15 @@ export default function Game(){
     function ProfessorGame() {
         // TODO: magic number
         let studentAIProb = 0.5
-        let studentUseAI = false;
-        let profSuspectAI = false;
         function rollEvent() {
-            studentUseAI = Math.random() < studentAIProb;
+            studentUseAI.current = Math.random() < studentAIProb;
             // Does the professor suspect AI?
-            profSuspectAI = studentUseAI ? (Math.random() < GameEvent.SUSPECT_AI.truePosRate) : (Math.random() < GameEvent.SUSPECT_AI.falsePosRate);
-            if (profSuspectAI) {
+            profSuspectAI.current = studentUseAI.current ? (Math.random() < GameEvent.SUSPECT_AI.truePosRate) : (Math.random() < GameEvent.SUSPECT_AI.falsePosRate);
+            if (profSuspectAI.current) {
                 setGameEvent(GameEvent.SUSPECT_AI);
             }
 
-            if (studentUseAI && !profSuspectAI) {
+            if (studentUseAI.current && !profSuspectAI.current) {
                 setStudentsGotAway(studentsGotAway + 1);
             }
         }
@@ -107,7 +107,7 @@ export default function Game(){
         function GameEventBox({eventText}) {
             function DoNothingButton() {
                 function handleClick() {
-                    if (studentUseAI) {
+                    if (studentUseAI.current) {
                         setStudentsGotAway(studentsGotAway + 1);
                     }
                     setGameEvent(GameEvent.NONE);
@@ -119,9 +119,8 @@ export default function Game(){
 
             function ReportStudentButton() {
                 function handleClick() {
-                    if (studentUseAI) {
+                    if (studentUseAI.current) {
                         setStudentsCaught(studentsCaught + 1);
-                        stats.studentsCaught += 1;
                     } else {
                         setStudentsFalselyAccused(studentsFalselyAccused + 1);
                     }
