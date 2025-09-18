@@ -1,6 +1,6 @@
 {
-  "name": "my-app",
-  "private": true,
+  "name": "Chaotic Classroom",
+  "homepage": "https://devontao.github.io/chaotic-classroom",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
